@@ -6,6 +6,70 @@ const STORAGE_ACOLITOS = "escala_acolitos";
 const STORAGE_EXEMPLOS_VERSAO = "escala_exemplos_versao";
 
 /* =========================================================
+   MIGRAÇÃO / ATUALIZAÇÃO DE DADOS
+========================================================= */
+
+const EXEMPLOS_VERSAO_ATUAL = "2";
+
+function normalizarDia(dia) {
+    if (!dia) return dia;
+    const mapa = {
+        "terça": "terca",
+        "sábado": "sabado",
+        "segunda-feira": "segunda",
+        "terça-feira": "terca",
+        "quarta-feira": "quarta",
+        "quinta-feira": "quinta",
+        "sexta-feira": "sexta"
+    };
+    return mapa[dia] || dia;
+}
+
+function atualizarDadosDeExemplo() {
+    const versao = localStorage.getItem(STORAGE_EXEMPLOS_VERSAO);
+
+    let lista = obterAcolitos();
+    let alterou = false;
+
+    lista = lista.map(acolito => {
+        const copia = { ...acolito };
+
+        if (Array.isArray(copia.disponibilidade)) {
+            const normalizada = copia.disponibilidade.map(normalizarDia);
+            if (JSON.stringify(normalizada) !== JSON.stringify(copia.disponibilidade)) {
+                copia.disponibilidade = normalizada;
+                alterou = true;
+            }
+        }
+
+        if (!copia.corAvatar) {
+            copia.corAvatar = gerarCorAvatarPastel();
+            alterou = true;
+        }
+
+        if (!Array.isArray(copia.funcoes)) {
+            copia.funcoes = [];
+            alterou = true;
+        }
+
+        if (typeof copia.ativo !== "boolean") {
+            copia.ativo = true;
+            alterou = true;
+        }
+
+        return copia;
+    });
+
+    if (alterou || versao !== EXEMPLOS_VERSAO_ATUAL) {
+        salvarAcolitos(lista);
+        localStorage.setItem(STORAGE_EXEMPLOS_VERSAO, EXEMPLOS_VERSAO_ATUAL);
+    }
+
+    salvarCoresAvatarSeNecessario(obterAcolitos());
+}
+
+
+/* =========================================================
    AVATARES
 ========================================================= */
 
@@ -117,7 +181,7 @@ function inicializarDados() {
 
                 disponibilidade: [
                     "domingo",
-                    "terça",
+                    "terca",
                     "quinta"
                 ]
 
@@ -142,7 +206,7 @@ function inicializarDados() {
 
                 disponibilidade: [
                     "domingo",
-                    "terça",
+                    "terca",
                     "quarta"
                 ]
 
@@ -166,7 +230,7 @@ function inicializarDados() {
                 ],
 
                 disponibilidade: [
-                    "terça",
+                    "terca",
                     "quinta",
                     "domingo"
                 ]
@@ -191,7 +255,7 @@ function inicializarDados() {
                 ],
 
                 disponibilidade: [
-                    "terça",
+                    "terca",
                     "quarta",
                     "domingo"
                 ]
@@ -217,7 +281,7 @@ function inicializarDados() {
 
                 disponibilidade: [
                     "domingo",
-                    "terça",
+                    "terca",
                     "quarta",
                     "quinta"
                 ]
@@ -266,6 +330,8 @@ function limparFormularioAcolito() {
     document.getElementById("formAcolito").reset();
 
     document.getElementById("acolitoId").value = "";
+
+    fotoTemporariaAcolito = "";
 
     document.getElementById("photoPreview").innerHTML =
         `<i class="bi bi-person-fill"></i>`;
@@ -352,6 +418,10 @@ function salvarAcolito() {
             lista[index].disponibilidade =
                 disponibilidade;
 
+            if (fotoTemporariaAcolito) {
+                lista[index].foto = fotoTemporariaAcolito;
+            }
+
         }
 
     } else {
@@ -362,7 +432,7 @@ function salvarAcolito() {
 
             nome,
 
-            foto: "",
+            foto: fotoTemporariaAcolito || "",
 
             ativo: true,
 
@@ -370,7 +440,9 @@ function salvarAcolito() {
 
             funcoes,
 
-            disponibilidade
+            disponibilidade,
+
+            corAvatar: gerarCorAvatarPastel()
 
         });
 
@@ -489,13 +561,8 @@ function renderizarAcolitos() {
 
 function criarCardAcolito(acolito) {
 
-    const foto = acolito.foto
-        ? `<img src="${acolito.foto}">`
-        : `<i class="bi bi-person-fill"></i>`;
-
-
     const funcoes =
-        acolito.funcoes.map(funcao => `
+        (acolito.funcoes || []).map(funcao => `
             <span class="function-badge">
                 ${funcao}
             </span>
@@ -509,7 +576,7 @@ function criarCardAcolito(acolito) {
             <div class="acolito-header">
 
                 <div class="acolito-photo">
-                    ${foto}
+                    ${criarAvatarHTML(acolito)}
                 </div>
 
                 <div>
@@ -653,6 +720,16 @@ function editarAcolito(id) {
     document.getElementById("modalAcolitoTitulo")
         .textContent = "Editar acólito";
 
+    fotoTemporariaAcolito = "";
+
+    if (acolito.foto) {
+        document.getElementById("photoPreview").innerHTML =
+            `<img src="${acolito.foto}">`;
+    } else {
+        document.getElementById("photoPreview").innerHTML =
+            `<i class="bi bi-person-fill"></i>`;
+    }
+
 
     bootstrap.Modal
         .getOrCreateInstance(
@@ -767,6 +844,8 @@ document
 
 
         reader.onload = e => {
+
+            fotoTemporariaAcolito = e.target.result;
 
             document.getElementById(
                 "photoPreview"
