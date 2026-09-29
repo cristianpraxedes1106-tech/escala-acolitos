@@ -1,0 +1,8 @@
+{
+  "appId": "com.escalaacolitos.app",
+  "appName": "Escala de Acólitos",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
