@@ -3,6 +3,7 @@
 ========================================================= */
 
 const STORAGE_ACOLITOS = "escala_acolitos";
+const STORAGE_EXEMPLOS_VERSAO = "escala_exemplos_versao";
 
 /* =========================================================
    AVATARES
