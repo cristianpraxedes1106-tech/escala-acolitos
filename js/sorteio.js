@@ -180,7 +180,7 @@ function obterCandidatos(
         }
 
 
-        if (!acolito.funcoes.includes(funcao.nome)) {
+        if (!(Array.isArray(acolito.funcoes) && acolito.funcoes.includes(funcao.nome))) {
 
             return false;
 
