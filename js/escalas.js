@@ -520,17 +520,27 @@ function renderizarEscalaVisual(escala) {
                 const bloqueado =
                     pessoa.locked;
 
+                const acolitoEscalado =
+                    pessoa.acolitoId
+                        ? obterAcolitos().find(
+                            acolito =>
+                                acolito.id === pessoa.acolitoId
+                        )
+                        : null;
 
                 html += `
 
                     <div class="scale-person">
 
-                        <span class="scale-person-name">
+                        <div class="scale-person-main">
 
-                            ${pessoa.nome}
+                            ${criarAvatarHTML(acolitoEscalado)}
 
-                        </span>
+                            <span class="scale-person-name">
+                                ${pessoa.nome}
+                            </span>
 
+                        </div>
 
                         <div class="scale-person-controls">
 
@@ -543,46 +553,10 @@ function renderizarEscalaVisual(escala) {
                                         ${index}
                                     )
                                 "
-                                title="${
-                                    bloqueado
-                                        ? "Desbloquear"
-                                        : "Bloquear"
-                                }"
+                                title="Alterar substituto"
                             >
-
-                                <i class="bi ${
-                                    bloqueado
-                                        ? "bi-lock-fill"
-                                        : "bi-unlock-fill"
-                                }"></i>
-
+                                <i class="bi bi-lock-fill"></i>
                             </button>
-
-
-                            ${
-                                !bloqueado
-                                    ? `
-
-                                        <button
-                                            class="reroll-btn"
-                                            onclick="
-                                                rerollPessoa(
-                                                    '${escala.id}',
-                                                    '${funcao.id}',
-                                                    ${index}
-                                                )
-                                            "
-                                        >
-
-                                            <i class="bi bi-arrow-repeat"></i>
-
-                                            Reroll
-
-                                        </button>
-
-                                    `
-                                    : ""
-                            }
 
                         </div>
 
@@ -624,51 +598,393 @@ function alternarLock(
     funcaoId,
     pessoaIndex
 ) {
+    abrirModalSubstituicao(
+        escalaId,
+        funcaoId,
+        pessoaIndex
+    );
+}
 
-    const escalas =
-        obterEscalas();
 
+/* =========================================================
+   SUBSTITUIÇÃO INDIVIDUAL
+========================================================= */
 
-    const escala =
-        escalas.find(
-            e => e.id === escalaId
-        );
+let vagaSubstituicaoAtual = null;
 
+function obterContextoSubstituicao(
+    escalaId,
+    funcaoId,
+    pessoaIndex
+) {
+    const escala = obterEscalas().find(
+        e => e.id === escalaId
+    );
+
+    if (!escala) return null;
+
+    const funcao = escala.funcoes.find(
+        f => f.id === funcaoId
+    );
+
+    if (!funcao) return null;
+
+    const pessoa = funcao.pessoas[pessoaIndex];
+
+    if (!pessoa) return null;
+
+    return { escala, funcao, pessoa, pessoaIndex };
+}
+
+function abrirModalSubstituicao(
+    escalaId,
+    funcaoId,
+    pessoaIndex
+) {
+    const contexto = obterContextoSubstituicao(
+        escalaId,
+        funcaoId,
+        pessoaIndex
+    );
+
+    if (!contexto) return;
+
+    vagaSubstituicaoAtual = {
+        escalaId,
+        funcaoId,
+        pessoaIndex
+    };
+
+    const acolitoAtual = contexto.pessoa.acolitoId
+        ? obterAcolitos().find(
+            a => a.id === contexto.pessoa.acolitoId
+        )
+        : null;
+
+    document.getElementById("substituicaoTitulo").textContent =
+        acolitoAtual
+            ? `Alterar ${acolitoAtual.nome}`
+            : "Escolher substituto";
+
+    document.getElementById("substituicaoDescricao").textContent =
+        `Função: ${contexto.funcao.nome}`;
+
+    bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("modalEscolhaSubstituicao")
+    ).show();
+}
+
+function fecharModalEscolhaSubstituicao() {
+    const modal = bootstrap.Modal.getInstance(
+        document.getElementById("modalEscolhaSubstituicao")
+    );
+
+    if (modal) modal.hide();
+}
+
+function obterOutrosSelecionados(
+    escala,
+    funcaoAtual,
+    pessoaIndexAtual
+) {
+    const selecionados = [];
+
+    escala.funcoes.forEach(funcao => {
+        funcao.pessoas.forEach((pessoa, index) => {
+            if (
+                funcao.id === funcaoAtual.id &&
+                index === pessoaIndexAtual
+            ) {
+                return;
+            }
+
+            if (pessoa.acolitoId) {
+                selecionados.push(pessoa);
+            }
+        });
+    });
+
+    return selecionados;
+}
+
+function obterCandidatosSubstituicao(
+    escala,
+    funcao,
+    pessoaIndex
+) {
+    const atual = funcao.pessoas[pessoaIndex];
+
+    const selecionados = obterOutrosSelecionados(
+        escala,
+        funcao,
+        pessoaIndex
+    );
+
+    return obterAcolitos().filter(acolito => {
+        if (!acolito.ativo) return false;
+
+        if (!acolito.funcoes.includes(funcao.nome)) {
+            return false;
+        }
+
+        if (!estaDisponivel(acolito, escala.data)) {
+            return false;
+        }
+
+        if (
+            atual.acolitoId &&
+            acolito.id === atual.acolitoId
+        ) {
+            return false;
+        }
+
+        if (
+            selecionados.some(
+                pessoa => pessoa.acolitoId === acolito.id
+            )
+        ) {
+            return false;
+        }
+
+        return true;
+    });
+}
+
+function substituirPessoaPorSorteio() {
+    if (!vagaSubstituicaoAtual) return;
+
+    const contexto = obterContextoSubstituicao(
+        vagaSubstituicaoAtual.escalaId,
+        vagaSubstituicaoAtual.funcaoId,
+        vagaSubstituicaoAtual.pessoaIndex
+    );
+
+    if (!contexto) return;
+
+    const candidatos = obterCandidatosSubstituicao(
+        contexto.escala,
+        contexto.funcao,
+        contexto.pessoaIndex
+    );
+
+    if (!candidatos.length) {
+        fecharModalEscolhaSubstituicao();
+
+        Swal.fire({
+            icon: "warning",
+            title: "Nenhum substituto encontrado",
+            text:
+                "Não há outro acólito disponível e habilitado para esta função."
+        });
+
+        return;
+    }
+
+    const novaPessoa = sortearPessoa(
+        {
+            nome: contexto.funcao.nome,
+            quantidade: 1
+        },
+        contexto.escala,
+        obterOutrosSelecionados(
+            contexto.escala,
+            contexto.funcao,
+            contexto.pessoaIndex
+        ),
+        [contexto.pessoa.acolitoId].filter(Boolean)
+    );
+
+    if (!novaPessoa) {
+        fecharModalEscolhaSubstituicao();
+
+        Swal.fire({
+            icon: "warning",
+            title: "Nenhum substituto encontrado",
+            text:
+                "Não foi possível sortear outro acólito para esta vaga."
+        });
+
+        return;
+    }
+
+    aplicarSubstituicao(contexto, novaPessoa);
+}
+
+function abrirEscolhaManualSubstituto() {
+    if (!vagaSubstituicaoAtual) return;
+
+    const contexto = obterContextoSubstituicao(
+        vagaSubstituicaoAtual.escalaId,
+        vagaSubstituicaoAtual.funcaoId,
+        vagaSubstituicaoAtual.pessoaIndex
+    );
+
+    if (!contexto) return;
+
+    const candidatos = obterCandidatosSubstituicao(
+        contexto.escala,
+        contexto.funcao,
+        contexto.pessoaIndex
+    );
+
+    document.getElementById(
+        "manualSubstituicaoDescricao"
+    ).textContent =
+        `${contexto.funcao.nome} • ${candidatos.length} disponível(is)`;
+
+    const container = document.getElementById(
+        "listaSubstitutos"
+    );
+
+    if (!candidatos.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-person-x"></i>
+                <h5>Nenhum substituto disponível</h5>
+                <p>
+                    Não há outro acólito ativo, disponível e habilitado
+                    para esta função neste dia.
+                </p>
+            </div>
+        `;
+    } else {
+        const ordem = {
+            alta: 3,
+            normal: 2,
+            baixa: 1
+        };
+
+        container.innerHTML = candidatos
+            .sort(
+                (a, b) =>
+                    (ordem[b.prioridade] || 0) -
+                    (ordem[a.prioridade] || 0)
+            )
+            .map(acolito => `
+                <button
+                    type="button"
+                    class="replacement-modal-person"
+                    onclick="selecionarSubstitutoManual('${acolito.id}')"
+                >
+                    ${criarAvatarHTML(acolito)}
+
+                    <span class="replacement-modal-info">
+                        <span class="replacement-modal-name">
+                            ${acolito.nome}
+                        </span>
+
+                        <span class="replacement-modal-details">
+                            Prioridade: ${acolito.prioridade}
+                        </span>
+                    </span>
+
+                    <i class="bi bi-chevron-right text-muted"></i>
+                </button>
+            `)
+            .join("");
+    }
+
+    fecharModalEscolhaSubstituicao();
+
+    bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("modalSubstitutoManual")
+    ).show();
+}
+
+function selecionarSubstitutoManual(acolitoId) {
+    if (!vagaSubstituicaoAtual) return;
+
+    const contexto = obterContextoSubstituicao(
+        vagaSubstituicaoAtual.escalaId,
+        vagaSubstituicaoAtual.funcaoId,
+        vagaSubstituicaoAtual.pessoaIndex
+    );
+
+    if (!contexto) return;
+
+    const escolhido = obterCandidatosSubstituicao(
+        contexto.escala,
+        contexto.funcao,
+        contexto.pessoaIndex
+    ).find(
+        acolito => acolito.id === acolitoId
+    );
+
+    if (!escolhido) {
+        Swal.fire({
+            icon: "warning",
+            title: "Acólito indisponível",
+            text:
+                "Esse acólito não está mais elegível para esta vaga."
+        });
+
+        return;
+    }
+
+    aplicarSubstituicao(
+        contexto,
+        {
+            acolitoId: escolhido.id,
+            nome: escolhido.nome,
+            foto: escolhido.foto || ""
+        }
+    );
+}
+
+function aplicarSubstituicao(
+    contexto,
+    novaPessoa
+) {
+    const escalas = obterEscalas();
+
+    const escala = escalas.find(
+        e => e.id === contexto.escala.id
+    );
 
     if (!escala) return;
 
-
-    const funcao =
-        escala.funcoes.find(
-            f => f.id === funcaoId
-        );
-
+    const funcao = escala.funcoes.find(
+        f => f.id === contexto.funcao.id
+    );
 
     if (!funcao) return;
 
-
-    const pessoa =
-        funcao.pessoas[pessoaIndex];
-
-
-    if (!pessoa) return;
-
-
-    pessoa.locked =
-        !pessoa.locked;
-
+    funcao.pessoas[contexto.pessoaIndex] = {
+        ...novaPessoa,
+        locked: true
+    };
 
     salvarEscalas(escalas);
 
+    escalaAtualVisualizada = escala;
+
+    const manual = bootstrap.Modal.getInstance(
+        document.getElementById("modalSubstitutoManual")
+    );
+
+    if (manual) manual.hide();
+
+    fecharModalEscolhaSubstituicao();
 
     renderizarEscalaVisual(escala);
 
+    Swal.fire({
+        icon: "success",
+        title: "Vaga atualizada!",
+        text:
+            `${novaPessoa.nome} foi selecionado(a).`,
+        timer: 1400,
+        showConfirmButton: false
+    });
 }
 
 
 /* =========================================================
    EXCLUIR ESCALA
 ========================================================= */
+
+
+
 
 function excluirEscala(id) {
 
