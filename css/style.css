@@ -1591,3 +1591,145 @@ body {
     }
 
 }
+
+/* =========================================================
+   AVATARES DOS ACÓLITOS
+========================================================= */
+
+.acolito-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b4b4b;
+    font-weight: 800;
+    font-size: 17px;
+}
+
+.acolito-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.acolito-avatar.avatar-sem-pessoa {
+    background: var(--surface-2);
+    color: var(--muted);
+}
+
+.photo-preview .acolito-avatar {
+    width: 130px;
+    height: 130px;
+    font-size: 38px;
+}
+
+.scale-person-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.scale-person-main .acolito-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 13px;
+}
+
+.replacement-modal-person {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: left;
+    transition: .15s;
+}
+
+.replacement-modal-person:hover {
+    border-color: rgba(67, 94, 190, .35);
+    background: rgba(67, 94, 190, .04);
+    transform: translateY(-1px);
+}
+
+.replacement-modal-person .acolito-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+}
+
+.replacement-modal-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.replacement-modal-name {
+    display: block;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.replacement-modal-details {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.replacement-choice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 17px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: var(--surface);
+    text-align: left;
+    transition: .15s;
+}
+
+.replacement-choice:hover {
+    border-color: rgba(67, 94, 190, .35);
+    background: rgba(67, 94, 190, .04);
+}
+
+.replacement-choice-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(67, 94, 190, .1);
+    color: var(--primary);
+    font-size: 20px;
+}
+
+.replacement-choice strong {
+    display: block;
+    font-size: 14px;
+}
+
+.replacement-choice span {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.replacement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 430px;
+    overflow-y: auto;
+}
