@@ -32,6 +32,15 @@ const MAPA_DIAS = {
 
 function estaDisponivel(acolito, data) {
 
+    if (!acolito || !Array.isArray(acolito.disponibilidade)) {
+        return false;
+    }
+
+    // Se não tiver nenhum dia marcado, considera disponível em todos
+    if (acolito.disponibilidade.length === 0) {
+        return true;
+    }
+
     const dia =
         new Date(
             data + "T12:00:00"
@@ -42,8 +51,19 @@ function estaDisponivel(acolito, data) {
         MAPA_DIAS[dia];
 
 
-    return acolito.disponibilidade
-        .includes(nomeDia);
+    const normalizar = (d) => {
+        if (!d) return d;
+        return String(d)
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+    };
+
+    const alvo = normalizar(nomeDia);
+
+    return acolito.disponibilidade.some(
+        d => normalizar(d) === alvo
+    );
 
 }
 
