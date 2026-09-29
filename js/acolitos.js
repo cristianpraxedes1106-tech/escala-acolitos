@@ -4,6 +4,89 @@
 
 const STORAGE_ACOLITOS = "escala_acolitos";
 
+/* =========================================================
+   AVATARES
+========================================================= */
+
+const CORES_AVATAR_PASTEL = [
+    "#DCEBFF", "#E8DFFF", "#FFE1E8", "#DDF3E4", "#FFF0C7",
+    "#DDF3F3", "#F1E1D0", "#E5E5FF", "#E5F0D5", "#F4DFEE"
+];
+
+let fotoTemporariaAcolito = "";
+
+function gerarCorAvatarPastel() {
+    return CORES_AVATAR_PASTEL[
+        Math.floor(Math.random() * CORES_AVATAR_PASTEL.length)
+    ];
+}
+
+function obterIniciais(nome) {
+    const partes = nome.trim().split(/\s+/).filter(Boolean);
+
+    if (!partes.length) return "?";
+
+    if (partes.length === 1) {
+        return partes[0].charAt(0).toUpperCase();
+    }
+
+    return (
+        partes[0].charAt(0) +
+        partes[partes.length - 1].charAt(0)
+    ).toUpperCase();
+}
+
+function garantirCorAvatar(acolito) {
+    if (!acolito.corAvatar) {
+        acolito.corAvatar = gerarCorAvatarPastel();
+    }
+
+    return acolito.corAvatar;
+}
+
+function criarAvatarHTML(acolito, classe = "") {
+    if (!acolito) {
+        return `
+            <div class="acolito-avatar ${classe} avatar-sem-pessoa">
+                <i class="bi bi-person-fill"></i>
+            </div>
+        `;
+    }
+
+    const cor = garantirCorAvatar(acolito);
+
+    if (acolito.foto) {
+        return `
+            <div class="acolito-avatar ${classe}">
+                <img src="${acolito.foto}" alt="${acolito.nome}">
+            </div>
+        `;
+    }
+
+    return `
+        <div class="acolito-avatar ${classe}"
+            style="background-color: ${cor};"
+            aria-label="${acolito.nome}">
+            <span>${obterIniciais(acolito.nome)}</span>
+        </div>
+    `;
+}
+
+function salvarCoresAvatarSeNecessario(lista) {
+    let alterou = false;
+
+    lista.forEach(acolito => {
+        if (!acolito.corAvatar) {
+            acolito.corAvatar = gerarCorAvatarPastel();
+            alterou = true;
+        }
+    });
+
+    if (alterou) {
+        salvarAcolitos(lista);
+    }
+}
+
 
 /* =========================================================
    DADOS INICIAIS
