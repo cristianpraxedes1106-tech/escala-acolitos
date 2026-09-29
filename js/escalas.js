@@ -99,35 +99,36 @@ function adicionarFuncao(
                 Selecione uma função
             </option>
 
-            <option
+            <option value="Cerimoniário"
                 ${nome === "Cerimoniário" ? "selected" : ""}
             >
                 Cerimoniário
             </option>
 
-            <option
+            <option value="Cruciferário"
                 ${nome === "Cruciferário" ? "selected" : ""}
             >
                 Cruciferário
             </option>
 
-            <option
+            <option value="Ceriferário"
                 ${nome === "Ceriferário" ? "selected" : ""}
             >
                 Ceriferário
             </option>
 
-            <option
+            <option value="Turiferário"
                 ${nome === "Turiferário" ? "selected" : ""}
             >
                 Turiferário
             </option>
 
-            <option
+            <option value="Naveteiro"
                 ${nome === "Naveteiro" ? "selected" : ""}
             >
                 Naveteiro
-            </option></select>
+            </option>
+        </select>
 
 
         <input
@@ -270,8 +271,27 @@ function criarEscala() {
         )
         .hide();
 
+    const vagasVazias = escala.funcoes.reduce(
+        (total, f) => total + f.pessoas.filter(p => !p.acolitoId).length,
+        0
+    );
 
-    visualizarEscala(escala.id);
+    if (vagasVazias > 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Escala com vagas em aberto",
+            html:
+                `<p>${vagasVazias} vaga(s) ficaram como <strong>não preenchida</strong>.</p>
+                 <p class="mb-0">Isso acontece quando não há acólito <em>ativo</em>, com a <em>função</em> marcada e <em>disponível neste dia da semana</em>.</p>
+                 <p class="mt-2 mb-0 text-muted small">Dica: em Acólitos → Editar → marque o dia da celebração em Disponibilidade.</p>`,
+            confirmButtonText: "Entendi",
+            confirmButtonColor: "#435ebe"
+        }).then(() => {
+            visualizarEscala(escala.id);
+        });
+    } else {
+        visualizarEscala(escala.id);
+    }
 
 }
 
@@ -875,11 +895,8 @@ function abrirEscolhaManualSubstituto() {
                             Prioridade: ${acolito.prioridade}
                         </span>
                     </span>
-
-                    <i class="bi bi-chevron-right text-muted"></i>
                 </button>
-            `)
-            .join("");
+            `).join("");
     }
 
     fecharModalEscolhaSubstituicao();
@@ -900,12 +917,8 @@ function selecionarSubstitutoManual(acolitoId) {
 
     if (!contexto) return;
 
-    const escolhido = obterCandidatosSubstituicao(
-        contexto.escala,
-        contexto.funcao,
-        contexto.pessoaIndex
-    ).find(
-        acolito => acolito.id === acolitoId
+    const escolhido = obterAcolitos().find(
+        a => a.id === acolitoId
     );
 
     if (!escolhido) {
@@ -984,9 +997,6 @@ function aplicarSubstituicao(
 /* =========================================================
    EXCLUIR ESCALA
 ========================================================= */
-
-
-
 
 function excluirEscala(id) {
 
