@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     inicializarDados();
 
+    atualizarDadosDeExemplo();
+
     atualizarDashboard();
 
     renderizarAcolitos();
