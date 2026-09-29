@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Escala de Acólitos</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    >
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- html2canvas -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="bi bi-cross"></i>
+            </div>
+
+            <div>
+                <h1>Escala</h1>
+                <span>Acólitos</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <button class="nav-item active" data-page="dashboard">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </button>
+
+            <button class="nav-item" data-page="acolitos">
+                <i class="bi bi-people-fill"></i>
+                <span>Acólitos</span>
+            </button>
+
+            <button class="nav-item" data-page="escalas">
+                <i class="bi bi-calendar3"></i>
+                <span>Escalas</span>
+            </button>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="version">
+                <span>Versão</span>
+                <strong>1.0</strong>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTEÚDO
+    ====================================================== -->
+
+    <main class="main-content">
+
+        <!-- HEADER -->
+
+        <header class="topbar">
+
+            <div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <span class="page-label" id="pageLabel">
+                    Dashboard
+                </span>
+            </div>
+
+            <div class="topbar-actions">
+
+                <button
+                    class="icon-btn"
+                    title="Notificações"
+                    onclick="mostrarNotificacao()"
+                >
+                    <i class="bi bi-bell"></i>
+                </button>
+
+                <div class="coordinator-profile">
+
+                    <div class="coordinator-avatar">
+                        C
+                    </div>
+
+                    <div class="coordinator-info">
+                        <strong>Coordenador</strong>
+                        <span>Administrador</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             PÁGINA: DASHBOARD
+        ====================================================== -->
+
+        <section class="page active-page" id="page-dashboard">
+
+            <div class="page-heading">
+
+                <div>
+                    <span class="eyebrow">VISÃO GERAL</span>
+
+                    <h2>
+                        Boa tarde! 👋
+                    </h2>
+
+                    <p>
+                        Organize as próximas escalas da equipe.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-primary-custom"
+                    onclick="abrirNovaEscala()"
+                >
+                    <i class="bi bi-plus-lg"></i>
+                    Nova escala
+                </button>
+
+            </div>
+
+
+            <!-- CARDS -->
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon blue">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+
+                    <div>
+                        <span>Acólitos ativos</span>
+                        <strong id="statAcolitos">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon green">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+
+                    <div>
+                        <span>Escalas este mês</span>
+                        <strong id="statEscalas">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon gold">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+
+                    <div>
+                        <span>Participações</span>
+                        <strong id="statParticipacoes">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon purple">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+
+                    <div>
+                        <span>Última escala</span>
+                        <strong id="statUltimaEscala">—</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PRÓXIMA ESCALA -->
+
+            <div class="section-title">
+                <div>
+                    <span class="eyebrow">PRÓXIMA CELEBRAÇÃO</span>
+                    <h3>Escala mais recente</h3>
+                </div>
+            </div>
+
+            <div id="dashboardProximaEscala">
+                <!-- preenchido pelo JS -->
+            </div>
+
+
+            <!-- ATALHOS -->
+
+            <div class="section-title mt-5">
+                <div>
+                    <span class="eyebrow">ACESSO RÁPIDO</span>
+                    <h3>O que deseja fazer?</h3>
+                </div>
+            </div>
+
+
+            <div class="quick-grid">
+
+                <button
+                    class="quick-card"
+                    onclick="abrirNovoAcolito()"
+                >
+
+                    <div class="quick-icon blue">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+
+                    <div>
+                        <strong>Novo acólito</strong>
+                        <span>Cadastrar alguém na equipe</span>
+                    </div>
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </button>
+
+
+                <button
+                    class="quick-card"
+                    onclick="abrirNovaEscala()"
+                >
+
+                    <div class="quick-icon green">
+                        <i class="bi bi-calendar-plus"></i>
+                    </div>
+
+                    <div>
+                        <strong>Nova escala</strong>
+                        <span>Organizar uma celebração</span>
+                    </div>
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PÁGINA: ACÓLITOS
+        ====================================================== -->
+
+        <section class="page" id="page-acolitos">
+
+            <div class="page-heading">
+
+                <div>
+                    <span class="eyebrow">EQUIPE</span>
+
+                    <h2>Acólitos</h2>
+
+                    <p>
+                        Gerencie os membros da equipe.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-primary-custom"
+                    onclick="abrirNovoAcolito()"
+                >
+                    <i class="bi bi-person-plus-fill"></i>
+                    Novo acólito
+                </button>
+
+            </div>
+
+
+            <div class="filter-bar">
+
+                <div class="search-box">
+
+                    <i class="bi bi-search"></i>
+
+                    <input
+                        type="text"
+                        id="searchAcolito"
+                        placeholder="Pesquisar acólito..."
+                        oninput="renderizarAcolitos()"
+                    >
+
+                </div>
+
+
+                <select
+                    id="filtroStatus"
+                    class="form-select custom-select"
+                    onchange="renderizarAcolitos()"
+                >
+                    <option value="todos">Todos</option>
+                    <option value="ativo">Ativos</option>
+                    <option value="inativo">Inativos</option>
+                </select>
+
+            </div>
+
+
+            <div
+                class="acolitos-grid"
+                id="listaAcolitos"
+            >
+                <!-- JS -->
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PÁGINA: ESCALAS
+        ====================================================== -->
+
+        <section class="page" id="page-escalas">
+
+            <div class="page-heading">
+
+                <div>
+                    <span class="eyebrow">ORGANIZAÇÃO</span>
+
+                    <h2>Escalas</h2>
+
+                    <p>
+                        Crie e gerencie as escalas das celebrações.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-primary-custom"
+                    onclick="abrirNovaEscala()"
+                >
+                    <i class="bi bi-plus-lg"></i>
+                    Nova escala
+                </button>
+
+            </div>
+
+
+            <div
+                class="escalas-list"
+                id="listaEscalas"
+            >
+                <!-- JS -->
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         MODAL: NOVO ACÓLITO
+    ====================================================== -->
+
+    <div
+        class="modal fade"
+        id="modalAcolito"
+        tabindex="-1"
+    >
+
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+
+            <div class="modal-content custom-modal">
+
+                <div class="modal-header">
+
+                    <div>
+                        <span class="eyebrow">EQUIPE</span>
+                        <h4 id="modalAcolitoTitulo">
+                            Novo acólito
+                        </h4>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                    ></button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                    <form id="formAcolito">
+
+                        <input
+                            type="hidden"
+                            id="acolitoId"
+                        >
+
+
+                        <div class="row g-4">
+
+                            <!-- FOTO -->
+
+                            <div class="col-md-4">
+
+                                <div class="photo-upload">
+
+                                    <div
+                                        class="photo-preview"
+                                        id="photoPreview"
+                                    >
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+
+                                    <label
+                                        class="btn btn-outline-secondary"
+                                        for="acolitoFoto"
+                                    >
+                                        <i class="bi bi-camera"></i>
+                                        Escolher foto
+                                    </label>
+
+                                    <input
+                                        type="file"
+                                        id="acolitoFoto"
+                                        accept="image/*"
+                                        hidden
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- DADOS -->
+
+                            <div class="col-md-8">
+
+                                <div class="mb-3">
+
+                                    <label class="form-label">
+                                        Nome completo
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control custom-input"
+                                        id="acolitoNome"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <label class="form-label">
+                                        Prioridade
+                                    </label>
+
+                                    <select
+                                        class="form-select custom-select"
+                                        id="acolitoPrioridade"
+                                    >
+
+                                        <option value="normal">
+                                            Normal
+                                        </option>
+
+                                        <option value="alta">
+                                            Alta — precisa de treinamento
+                                        </option>
+
+                                        <option value="baixa">
+                                            Baixa
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div>
+
+                                    <label class="form-label">
+                                        Funções que pode exercer
+                                    </label>
+
+                                    <div class="function-checks">
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                value="Cerimoniário"
+                                                class="funcao-check"
+                                            >
+                                            Cerimoniário
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                value="Cruciferário"
+                                                class="funcao-check"
+                                            >
+                                            Cruciferário
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                value="Ceriferário"
+                                                class="funcao-check"
+                                            >
+                                            Ceriferário
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                value="Turiferário"
+                                                class="funcao-check"
+                                            >
+                                            Turiferário
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                value="Naveteiro"
+                                                class="funcao-check"
+                                            >
+                                            Naveteiro
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                value="Acólito"
+                                                class="funcao-check"
+                                            >
+                                            Acólito
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- DISPONIBILIDADE -->
+
+                            <div class="col-12">
+
+                                <hr>
+
+                                <h5 class="modal-section-title">
+                                    Disponibilidade
+                                </h5>
+
+                                <p class="text-muted small">
+                                    Se nenhum dia for selecionado,
+                                    o acólito será considerado disponível
+                                    apenas quando configurado posteriormente.
+                                </p>
+
+
+                                <div class="days-grid">
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value="domingo"
+                                            class="dia-check"
+                                        >
+                                        Domingo
+                                    </label>
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value="segunda"
+                                            class="dia-check"
+                                        >
+                                        Segunda
+                                    </label>
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value="terca"
+                                            class="dia-check"
+                                        >
+                                        Terça
+                                    </label>
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value="quarta"
+                                            class="dia-check"
+                                        >
+                                        Quarta
+                                    </label>
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value="quinta"
+                                            class="dia-check"
+                                        >
+                                        Quinta
+                                    </label>
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value="sexta"
+                                            class="dia-check"
+                                        >
+                                        Sexta
+                                    </label>
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value="sabado"
+                                            class="dia-check"
+                                        >
+                                        Sábado
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        class="btn btn-primary-custom"
+                        onclick="salvarAcolito()"
+                    >
+                        Salvar acólito
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MODAL: NOVA ESCALA
+    ====================================================== -->
+
+    <div
+        class="modal fade"
+        id="modalEscala"
+        tabindex="-1"
+    >
+
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+
+            <div class="modal-content custom-modal">
+
+                <div class="modal-header">
+
+                    <div>
+                        <span class="eyebrow">NOVA CELEBRAÇÃO</span>
+                        <h4>Configurar escala</h4>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                    ></button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                    <form id="formEscala">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Data
+                                </label>
+
+                                <input
+                                    type="date"
+                                    class="form-control custom-input"
+                                    id="escalaData"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Horário
+                                </label>
+
+                                <input
+                                    type="time"
+                                    class="form-control custom-input"
+                                    id="escalaHora"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <hr class="my-4">
+
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+                                <h5 class="modal-section-title mb-1">
+                                    Funções
+                                </h5>
+
+                                <span class="text-muted small">
+                                    Defina quantas pessoas serão necessárias.
+                                </span>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                onclick="adicionarFuncao()"
+                            >
+                                <i class="bi bi-plus"></i>
+                                Adicionar função
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            class="functions-builder mt-3"
+                            id="functionsBuilder"
+                        >
+
+                            <!-- JS -->
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        class="btn btn-primary-custom"
+                        onclick="criarEscala()"
+                    >
+                        <i class="bi bi-magic"></i>
+                        Gerar escala
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MODAL: VISUALIZAR ESCALA
+    ====================================================== -->
+
+    <div
+        class="modal fade"
+        id="modalVisualizarEscala"
+        tabindex="-1"
+    >
+
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+
+            <div class="modal-content custom-modal">
+
+                <div class="modal-header">
+
+                    <div>
+                        <span class="eyebrow">
+                            ESCALA GERADA
+                        </span>
+
+                        <h4 id="visualEscalaTitulo">
+                            Escala
+                        </h4>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                    ></button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                    <div
+                        class="scale-preview"
+                        id="scalePreview"
+                    >
+                        <!-- JS -->
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+                        Fechar
+                    </button>
+
+                    <button
+                        class="btn btn-outline-primary"
+                        onclick="baixarEscalaImagem()"
+                    >
+                        <i class="bi bi-image"></i>
+                        Baixar imagem
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Bootstrap JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+
+    <!-- JavaScript do projeto -->
+
+    <script src="js/sorteio.js"></script>
+    <script src="js/acolitos.js"></script>
+    <script src="js/escalas.js"></script>
+    <script src="js/exportacao.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
