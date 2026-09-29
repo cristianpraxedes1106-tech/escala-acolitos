@@ -127,15 +127,7 @@ function adicionarFuncao(
                 ${nome === "Naveteiro" ? "selected" : ""}
             >
                 Naveteiro
-            </option>
-
-            <option
-                ${nome === "Acólito" ? "selected" : ""}
-            >
-                Acólito
-            </option>
-
-        </select>
+            </option></select>
 
 
         <input
@@ -655,6 +647,12 @@ function abrirModalSubstituicao(
         pessoaIndex
     };
 
+    const modalEscala = bootstrap.Modal.getInstance(
+        document.getElementById("modalVisualizarEscala")
+    );
+
+    if (modalEscala) modalEscala.hide();
+
     const acolitoAtual = contexto.pessoa.acolitoId
         ? obterAcolitos().find(
             a => a.id === contexto.pessoa.acolitoId
@@ -967,6 +965,10 @@ function aplicarSubstituicao(
     fecharModalEscolhaSubstituicao();
 
     renderizarEscalaVisual(escala);
+
+    bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("modalVisualizarEscala")
+    ).show();
 
     Swal.fire({
         icon: "success",
