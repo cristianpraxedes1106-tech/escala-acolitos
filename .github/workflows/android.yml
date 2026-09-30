@@ -9,49 +9,47 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
-
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
+          cache: npm
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v4
+      - name: Instalar SDK Android necessário
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
       - name: Instalar dependências
         run: npm install
-
       - name: Preparar arquivos web
         run: |
-          mkdir -p www
-          rsync -a \
-            --exclude='www' \
-            --exclude='node_modules' \
-            --exclude='.git' \
-            --exclude='android' \
-            --exclude='.github' \
-            ./ www/
-
+          rm -rf www
+          mkdir -p www/vendor/fonts
+          rsync -a --exclude='www' --exclude='node_modules' --exclude='.git' --exclude='android' --exclude='.github' ./ www/
+          cp node_modules/bootstrap/dist/css/bootstrap.min.css www/vendor/bootstrap.min.css
+          cp node_modules/bootstrap/dist/js/bootstrap.bundle.min.js www/vendor/bootstrap.bundle.min.js
+          cp node_modules/bootstrap-icons/font/bootstrap-icons.min.css www/vendor/bootstrap-icons.min.css
+          cp node_modules/bootstrap-icons/font/fonts/* www/vendor/fonts/
+          cp node_modules/sweetalert2/dist/sweetalert2.all.min.js www/vendor/sweetalert2.all.min.js
+          cp node_modules/html2canvas/dist/html2canvas.min.js www/vendor/html2canvas.min.js
       - name: Criar projeto Android do Capacitor
         run: npx cap add android
-
       - name: Sincronizar aplicativo
         run: npx cap sync android
-
       - name: Dar permissão ao Gradle
         run: chmod +x android/gradlew
-
       - name: Gerar APK
         working-directory: android
         run: ./gradlew assembleDebug --stacktrace
-
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
