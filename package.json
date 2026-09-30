@@ -7,9 +7,15 @@
     "android:sync": "npx cap sync android",
     "android:build": "cd android && ./gradlew assembleDebug"
   },
-  "devDependencies": {
+  "dependencies": {
     "@capacitor/android": "^8.0.0",
-    "@capacitor/cli": "^8.0.0",
-    "@capacitor/core": "^8.0.0"
+    "@capacitor/core": "^8.0.0",
+    "bootstrap": "5.3.8",
+    "bootstrap-icons": "1.13.1",
+    "html2canvas": "1.4.1",
+    "sweetalert2": "11.26.25"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
   }
 }
